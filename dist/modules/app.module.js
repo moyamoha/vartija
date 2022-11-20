@@ -24,9 +24,7 @@ AppModule = __decorate([
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
             }),
-            mongoose_1.MongooseModule.forRoot(process.env.NODE_ENV === 'production'
-                ? process.env.MONGODB_ATLAS_URL
-                : process.env.MONGODB_LOCAL_URL),
+            mongoose_1.MongooseModule.forRoot(process.env.MONGODB_ATLAS_URL),
             auth_module_1.AuthModule,
             user_module_1.UserModule,
             entry_module_1.EntryModule,

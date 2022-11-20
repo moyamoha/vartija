@@ -14,11 +14,7 @@ import { UserModule } from './user.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRoot(
-      process.env.NODE_ENV === 'production'
-        ? process.env.MONGODB_ATLAS_URL
-        : process.env.MONGODB_LOCAL_URL,
-    ),
+    MongooseModule.forRoot(process.env.MONGODB_ATLAS_URL),
     AuthModule,
     UserModule,
     EntryModule,
