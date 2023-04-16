@@ -103,7 +103,7 @@ export class EntryService {
           _id: id,
           owner: ownerId,
         },
-        entryObj,
+        { ...entryObj },
         { returnDocument: 'after', runValidators: true },
       );
       // await updated.validate();
