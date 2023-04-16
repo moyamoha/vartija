@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Schema } from 'mongoose';
+import { Model, Schema, Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
 import { UserDocument } from 'src/schemas/user.schema';
@@ -120,15 +120,16 @@ export class EntryService {
 
       const entry = await this.entryModel.findById(id);
       if (!entry) throwNotFoundError('Entry', id);
-      entry.category = new Schema.Types.ObjectId(body.newCategoryId);
+      entry.category = new Types.ObjectId(body.newCategoryId);
 
       oldCategory.items = oldCategory.items.filter((c) => c.toString() !== id);
-      newCategory.items.push(new Schema.Types.ObjectId(id));
-
+      newCategory.items.push(new Types.ObjectId(id));
+      console.log('tänne');
       await entry.save();
       await oldCategory.save();
       await newCategory.save();
     } catch (error) {
+      console.log(error);
       throw new BadRequestException(
         'Bad request, please check the payload of your request',
       );

@@ -27,14 +27,14 @@ export class Entry {
   url: string;
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Types.ObjectId,
     ref: 'Category',
     required: true,
   })
-  category: mongoose.Schema.Types.ObjectId;
+  category: mongoose.Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-  owner: mongoose.Schema.Types.ObjectId;
+  owner: mongoose.Types.ObjectId;
 }
 
 export const EntrySchema = SchemaFactory.createForClass(Entry);
