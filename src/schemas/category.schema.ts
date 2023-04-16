@@ -12,7 +12,7 @@ export class Category {
   owner: mongoose.Schema.Types.ObjectId;
 
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Entry' })
-  items: [mongoose.Schema.Types.ObjectId];
+  items: mongoose.Schema.Types.ObjectId[];
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

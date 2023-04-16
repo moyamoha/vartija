@@ -4,10 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Schema } from 'mongoose';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
 import { UserDocument } from 'src/schemas/user.schema';
+import { ChangeCategoryPayload } from 'src/types/custom';
+import { throwNotFoundError } from 'src/utils/utility-functions';
 
 @Injectable()
 export class EntryService {
@@ -23,9 +25,7 @@ export class EntryService {
     let entries = [];
     if (categoryId) {
       const category = await this.categModel.findById(categoryId);
-      if (!category) {
-        throw new NotFoundException(`Category ${categoryId} was not found`);
-      }
+      if (!category) throwNotFoundError('Category', categoryId);
 
       entries = await this.entryModel.find({
         owner: user._id,
@@ -46,9 +46,7 @@ export class EntryService {
       _id: id,
     });
     // .populate('category', { name: 1 });
-    if (!foundEntry) {
-      throw new NotFoundException(`Entry ${id} was not found`);
-    }
+    if (!foundEntry) throwNotFoundError('Entry', id);
     return foundEntry;
   }
 
@@ -110,6 +108,30 @@ export class EntryService {
       return updated;
     } catch (e) {
       throw new BadRequestException(e, e.message);
+    }
+  }
+
+  async changeEntryCategory(id: string, body: ChangeCategoryPayload) {
+    try {
+      const oldCategory = await this.categModel.findById(body.oldCategoryId);
+      const newCategory = await this.categModel.findById(body.newCategoryId);
+      if (!oldCategory) throwNotFoundError('Category', body.oldCategoryId);
+      if (!newCategory) throwNotFoundError('Category', body.newCategoryId);
+
+      const entry = await this.entryModel.findById(id);
+      if (!entry) throwNotFoundError('Entry', id);
+      entry.category = new Schema.Types.ObjectId(body.newCategoryId);
+
+      oldCategory.items = oldCategory.items.filter((c) => c.toString() !== id);
+      newCategory.items.push(new Schema.Types.ObjectId(id));
+
+      await entry.save();
+      await oldCategory.save();
+      await newCategory.save();
+    } catch (error) {
+      throw new BadRequestException(
+        'Bad request, please check the payload of your request',
+      );
     }
   }
 

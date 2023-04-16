@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -16,7 +17,7 @@ import { AuthTokenGaurd } from 'src/config/auth-token.gaurd';
 import { ErrorsInterceptor } from 'src/interceptors/error.interceptor';
 import { EntryDocument } from 'src/schemas/entry.schema';
 import { EntryService } from 'src/services/entry.service';
-import { CustomReq } from 'src/types/custom';
+import { ChangeCategoryPayload, CustomReq } from 'src/types/custom';
 
 @UseInterceptors(ErrorsInterceptor)
 @UseGuards(AuthTokenGaurd)
@@ -57,5 +58,14 @@ export class EntryController {
   @Delete(':id')
   async deleteEntry(@Req() req: CustomReq, @Param('id') id) {
     return await this.entryService.deleteEntry(req.user._id, id);
+  }
+
+  @HttpCode(200)
+  @Patch(':id/change-category')
+  async changeEntryCategory(
+    @Param('id') identity,
+    @Body() body: ChangeCategoryPayload,
+  ) {
+    await this.entryService.changeEntryCategory(identity, body);
   }
 }
