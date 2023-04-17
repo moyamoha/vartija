@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Schema, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
 import { UserDocument } from 'src/schemas/user.schema';

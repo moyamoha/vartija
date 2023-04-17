@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
+import { EntryStatus } from 'src/types/custom';
 // import { User } from './user.schema';
 
 export type EntryDocument = Document & Entry;
@@ -35,6 +36,14 @@ export class Entry {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
   owner: mongoose.Types.ObjectId;
+
+  @Prop({
+    type: String,
+    enum: ['active', 'expired'],
+    required: 'false',
+    default: 'active',
+  })
+  status: EntryStatus;
 }
 
 export const EntrySchema = SchemaFactory.createForClass(Entry);

@@ -11,3 +11,5 @@ export type ChangeCategoryPayload = {
 };
 
 export type ResourseType = 'Category' | 'Entry' | 'User';
+
+export type EntryStatus = 'active' | 'expired';
