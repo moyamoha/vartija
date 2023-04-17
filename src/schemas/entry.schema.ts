@@ -40,7 +40,7 @@ export class Entry {
   @Prop({
     type: String,
     enum: ['active', 'expired'],
-    required: 'false',
+    required: false,
     default: 'active',
   })
   status: EntryStatus;
