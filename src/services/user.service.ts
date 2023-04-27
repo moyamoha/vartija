@@ -8,7 +8,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
-import { UserActivity } from 'src/schemas/user-activity.schema';
+import {
+  UserActivity,
+  UserActivityDocument,
+} from 'src/schemas/user-activity.schema';
 
 import { User, UserDocument } from 'src/schemas/user.schema';
 import {
@@ -187,5 +190,17 @@ export class UserService {
 
   async findUserByCode(code: number): Promise<UserDocument> {
     return await this.userModel.findOne({ verificationCode: code });
+  }
+
+  async getActivityHistory(userId: string): Promise<UserActivityDocument[]> {
+    let history = [];
+    history = await this.userActivityModel
+      .find({ userId: userId })
+      .sort({ timestamp: -1 });
+    return history;
+  }
+
+  async clearActivityHistory(userId: string): Promise<void> {
+    await this.userActivityModel.deleteMany({ userId: userId });
   }
 }

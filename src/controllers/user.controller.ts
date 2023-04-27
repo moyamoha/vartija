@@ -2,7 +2,9 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Patch,
   Put,
   Query,
@@ -69,5 +71,18 @@ export class UserController {
       throw new BadRequestException('Current password is incorrect!');
     }
     await this.userService.changePassword(req.user, body);
+  }
+
+  @UseGuards(AuthTokenGaurd)
+  @Get('activity-history')
+  async getActivityHistory(@Req() req: CustomReq) {
+    return await this.userService.getActivityHistory(req.user._id);
+  }
+
+  @UseGuards(AuthTokenGaurd)
+  @Delete('clear-activity-history')
+  @HttpCode(204)
+  async clearActivityHistory(@Req() req: CustomReq) {
+    await this.userService.clearActivityHistory(req.user._id);
   }
 }
