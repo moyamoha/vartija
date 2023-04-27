@@ -42,7 +42,8 @@ export class CategoryService {
       const result = await category.save();
       await new this.userActivityModel({
         userId: ownerId,
-        activityType: 'CREATE_CATEGORY',
+        activityType: ACTIVITY_TYPES.ADD_CATEGORY,
+        timestamp: new Date(),
       }).save();
       return result;
     } catch (e) {

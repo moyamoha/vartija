@@ -64,6 +64,7 @@ export class UserService {
     await new this.userActivityModel({
       user: created._id,
       activity: ACTIVITY_TYPES.REGISTER,
+      timestamp: new Date(),
     }).save();
     return created;
   }
