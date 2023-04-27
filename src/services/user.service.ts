@@ -86,6 +86,7 @@ export class UserService {
       await new this.userActivityModel({
         userId: user._id,
         activity: ACTIVITY_TYPES.DEACTIVATE_ACCOUNT,
+        timestamp: new Date(),
       }).save();
     } catch (e) {}
   }
@@ -102,6 +103,7 @@ export class UserService {
     await new this.userActivityModel({
       userId: user._id,
       activityType: ACTIVITY_TYPES.DELETE_ACCOUNT,
+      timestamp: new Date(),
     }).save();
   }
 
@@ -142,6 +144,7 @@ export class UserService {
       await new this.userActivityModel({
         userId: updated._id,
         activityType: activityType,
+        timestamp: new Date(),
       }).save();
       return updated;
     } catch (e) {
@@ -160,6 +163,7 @@ export class UserService {
       await new this.userActivityModel({
         userId: user._id,
         activityType: ACTIVITY_TYPES.CHANGE_NAME,
+        timestamp: new Date(),
       }).save();
     } catch (e) {
       throw new BadRequestException(e, e.message);
@@ -183,6 +187,7 @@ export class UserService {
       await new this.userActivityModel({
         userId: user._id,
         activityType: ACTIVITY_TYPES.CHANGE_PASSWORD,
+        timestamp: new Date(),
       }).save();
     } catch (e) {
       throw new BadRequestException(e, e.message);

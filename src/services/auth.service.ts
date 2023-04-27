@@ -15,6 +15,7 @@ import { randomPass } from 'src/utils/random';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserActivity } from 'src/schemas/user-activity.schema';
+import { ACTIVITY_TYPES } from 'src/utils/constants';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +33,8 @@ export class AuthService {
       user.isActive = true;
       await new this.userActivityModel({
         userId: user._id,
-        activityType: 'reactivate account',
+        activityType: ACTIVITY_TYPES.REACTIVATE_ACCOUNT,
+        timestamp: new Date(),
       }).save();
     }
     const payload = {
@@ -47,7 +49,8 @@ export class AuthService {
     await user.save();
     await new this.userActivityModel({
       userId: user._id,
-      activityType: 'login',
+      activityType: ACTIVITY_TYPES.LOGIN,
+      timestamp: new Date(),
     }).save();
     return { accessToken };
   }

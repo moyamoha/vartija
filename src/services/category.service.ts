@@ -79,6 +79,7 @@ export class CategoryService {
     await new this.userActivityModel({
       userId: ownerId,
       activityType: ACTIVITY_TYPES.DELETE_CATEGORY,
+      timestamp: new Date(),
     }).save();
   }
 
@@ -106,6 +107,7 @@ export class CategoryService {
     await new this.userActivityModel({
       userId: ownerId,
       activityType: ACTIVITY_TYPES.EDIT_CATEGORY,
+      timestamp: new Date(),
     }).save();
     return updated;
   }

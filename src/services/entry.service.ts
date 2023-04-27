@@ -80,6 +80,7 @@ export class EntryService {
       await new this.userActivityModel({
         userId: ownerId,
         activityType: ACTIVITY_TYPES.ADD_ENTRY,
+        timestamp: new Date(),
       }).save();
       return result;
     } catch (e) {
@@ -117,6 +118,7 @@ export class EntryService {
       await new this.userActivityModel({
         userId: ownerId,
         activityType: ACTIVITY_TYPES.EDIT_ENTRY,
+        timestamp: new Date(),
       }).save();
       return updated;
     } catch (e) {
@@ -143,6 +145,7 @@ export class EntryService {
       await new this.userActivityModel({
         userId: entry.owner,
         activityType: ACTIVITY_TYPES.EDIT_ENTRY,
+        timestamp: new Date(),
       }).save();
     } catch (error) {
       console.log(error);
@@ -166,6 +169,7 @@ export class EntryService {
     await new this.userActivityModel({
       userId: ownerId,
       activityType: ACTIVITY_TYPES.DELETE_ENTRY,
+      timestamp: new Date(),
     }).save();
   }
 }
