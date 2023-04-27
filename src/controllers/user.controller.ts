@@ -80,7 +80,7 @@ export class UserController {
   }
 
   @UseGuards(AuthTokenGaurd)
-  @Delete('clear-activity-history')
+  @Delete('activity-history')
   @HttpCode(204)
   async clearActivityHistory(@Req() req: CustomReq) {
     await this.userService.clearActivityHistory(req.user._id);
