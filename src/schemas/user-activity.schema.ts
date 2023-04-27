@@ -15,7 +15,7 @@ export class UserActivity {
   })
   activityType: string;
 
-  @Prop({ required: false, default: new Date() })
+  @Prop({ required: false, default: new Date(), type: Date })
   timestamp: Date | string;
 }
 
