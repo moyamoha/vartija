@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 import { EntryStatus } from 'src/types/custom';
+import { POSSIBLE_ENTRY_STATUS } from 'src/utils/constants';
 // import { User } from './user.schema';
 
 export type EntryDocument = Document & Entry;
@@ -39,7 +40,7 @@ export class Entry {
 
   @Prop({
     type: String,
-    enum: ['active', 'expired'],
+    enum: POSSIBLE_ENTRY_STATUS,
     required: false,
     default: 'active',
   })

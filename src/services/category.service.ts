@@ -8,12 +8,16 @@ import { Model } from 'mongoose';
 
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
+import { UserActivity } from 'src/schemas/user-activity.schema';
+import { ACTIVITY_TYPES } from 'src/utils/constants';
 
 @Injectable()
 export class CategoryService {
   constructor(
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
     @InjectModel(Entry.name) private entryModel: Model<EntryDocument>,
+    @InjectModel(UserActivity.name)
+    private userActivityModel: Model<UserActivity>,
   ) {}
 
   async getAll(ownerId: string): Promise<CategoryDocument[]> {
@@ -35,7 +39,12 @@ export class CategoryService {
         ...data,
         owner: ownerId,
       });
-      return await category.save();
+      const result = await category.save();
+      await new this.userActivityModel({
+        userId: ownerId,
+        activityType: 'CREATE_CATEGORY',
+      }).save();
+      return result;
     } catch (e) {
       throw new BadRequestException(e, e.message);
     }
@@ -66,6 +75,10 @@ export class CategoryService {
       category: categoryBeforeDeletion._id,
       owner: ownerId,
     });
+    await new this.userActivityModel({
+      userId: ownerId,
+      activityType: ACTIVITY_TYPES.DELETE_CATEGORY,
+    }).save();
   }
 
   async editCategory(
@@ -89,6 +102,10 @@ export class CategoryService {
     if (!updated) {
       throw new NotFoundException(`Category ${id} was not found`);
     }
+    await new this.userActivityModel({
+      userId: ownerId,
+      activityType: ACTIVITY_TYPES.EDIT_CATEGORY,
+    }).save();
     return updated;
   }
 }

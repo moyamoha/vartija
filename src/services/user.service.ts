@@ -8,6 +8,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
+import { UserActivity } from 'src/schemas/user-activity.schema';
 
 import { User, UserDocument } from 'src/schemas/user.schema';
 import {
@@ -15,12 +16,15 @@ import {
   accountDeactivedEmailResp,
   accountDeletedEmailResp,
   mfaEnabledEmailResp,
+  ACTIVITY_TYPES,
 } from 'src/utils/constants';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(UserActivity.name)
+    private userActivityModel: Model<UserActivity>,
     private mailerService: MailerService,
   ) {}
 
@@ -54,6 +58,10 @@ export class UserService {
       Before you can do anything, please confirm your email address by clicking <a href="${confirmationLink}">This link</a>
       <br></br><i>Team Guardian.</i></p>`,
     });
+    await new this.userActivityModel({
+      user: created._id,
+      activity: ACTIVITY_TYPES.REGISTER,
+    }).save();
     return created;
   }
   async findOneByEmail(email: string): Promise<UserDocument> {
@@ -71,6 +79,10 @@ export class UserService {
         <br></br><i>Team Guardian.</i></p>`,
       });
       await user.save();
+      await new this.userActivityModel({
+        userId: user._id,
+        activity: ACTIVITY_TYPES.DEACTIVATE_ACCOUNT,
+      }).save();
     } catch (e) {}
   }
 
@@ -83,6 +95,10 @@ export class UserService {
       html: `<p><strong>Dear ${user.firstname}!</strong><br></br>${accountDeletedEmailResp}
       <br></br><i>Team Guardian.</i></p>`,
     });
+    await new this.userActivityModel({
+      userId: user._id,
+      activityType: ACTIVITY_TYPES.DELETE_ACCOUNT,
+    }).save();
   }
 
   async confirmEmail(id: string): Promise<string> {
@@ -116,6 +132,13 @@ export class UserService {
         html: `<p><strong>Dear ${updated.firstname}!</strong><br></br>${bodyText}
         <br></br><i>Team Guardian.</i></p>`,
       });
+      const activityType = mfaEnabled
+        ? ACTIVITY_TYPES.ENABLE_2FA
+        : ACTIVITY_TYPES.DISABLE_2FA;
+      await new this.userActivityModel({
+        userId: updated._id,
+        activityType: activityType,
+      }).save();
       return updated;
     } catch (e) {
       throw new BadRequestException('Could not update user');
@@ -130,6 +153,10 @@ export class UserService {
     user.lastname = body.lastname;
     try {
       await user.save();
+      await new this.userActivityModel({
+        userId: user._id,
+        activityType: ACTIVITY_TYPES.CHANGE_NAME,
+      }).save();
     } catch (e) {
       throw new BadRequestException(e, e.message);
     }
@@ -149,6 +176,10 @@ export class UserService {
       await mockUser.validate();
       user.password = await bcrypt.hash(body.newPassword, 10);
       await user.save({ validateBeforeSave: false });
+      await new this.userActivityModel({
+        userId: user._id,
+        activityType: ACTIVITY_TYPES.CHANGE_PASSWORD,
+      }).save();
     } catch (e) {
       throw new BadRequestException(e, e.message);
     }

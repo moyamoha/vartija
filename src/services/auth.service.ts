@@ -12,6 +12,9 @@ import { faker } from '@faker-js/faker';
 import { UserDocument } from 'src/schemas/user.schema';
 import { UserService } from './user.service';
 import { randomPass } from 'src/utils/random';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { UserActivity } from 'src/schemas/user-activity.schema';
 
 @Injectable()
 export class AuthService {
@@ -19,11 +22,19 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private mailerService: MailerService,
+    @InjectModel(UserActivity.name)
+    private userActivityModel: Model<UserActivity>,
   ) {}
 
   async login(user: UserDocument): Promise<{ accessToken: string }> {
     user.lastLoggedIn = new Date();
-    if (!user.isActive) user.isActive = true;
+    if (!user.isActive) {
+      user.isActive = true;
+      await new this.userActivityModel({
+        userId: user._id,
+        activityType: 'reactivate account',
+      }).save();
+    }
     const payload = {
       email: user.email,
       firstname: user.firstname,
@@ -34,6 +45,10 @@ export class AuthService {
       secret: process.env.JWT_SECRET,
     });
     await user.save();
+    await new this.userActivityModel({
+      userId: user._id,
+      activityType: 'login',
+    }).save();
     return { accessToken };
   }
 
