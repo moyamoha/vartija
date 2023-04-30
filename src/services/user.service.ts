@@ -80,7 +80,7 @@ export class UserService {
       await user.save();
       await new this.userActivityModel({
         userId: user._id,
-        activity: ACTIVITY_TYPES.DEACTIVATE_ACCOUNT,
+        activityType: ACTIVITY_TYPES.DEACTIVATE_ACCOUNT,
         timestamp: new Date(),
       }).save();
     } catch (e) {}
