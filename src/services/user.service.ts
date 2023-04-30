@@ -172,6 +172,10 @@ export class UserService {
         password: body.newPassword,
       });
       await mockUser.validate();
+      const isMatch = await bcrypt.compare(body.currentPassword, user.password);
+      if (!isMatch) {
+        throw new BadRequestException('Current password is incorrect');
+      }
       user.password = await bcrypt.hash(body.newPassword, 10);
       await user.save({ validateBeforeSave: false });
       await new this.userActivityModel({
