@@ -61,11 +61,6 @@ export class UserService {
       Before you can do anything, please confirm your email address by clicking <a href="${confirmationLink}">This link</a>
       <br></br><i>Team Guardian.</i></p>`,
     });
-    await new this.userActivityModel({
-      user: created._id,
-      activity: ACTIVITY_TYPES.REGISTER,
-      timestamp: new Date(),
-    }).save();
     return created;
   }
   async findOneByEmail(email: string): Promise<UserDocument> {
@@ -100,11 +95,6 @@ export class UserService {
       html: `<p><strong>Dear ${user.firstname}!</strong><br></br>${accountDeletedEmailResp}
       <br></br><i>Team Guardian.</i></p>`,
     });
-    await new this.userActivityModel({
-      userId: user._id,
-      activityType: ACTIVITY_TYPES.DELETE_ACCOUNT,
-      timestamp: new Date(),
-    }).save();
   }
 
   async confirmEmail(id: string): Promise<string> {

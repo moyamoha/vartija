@@ -12,7 +12,6 @@ Once removed you can not recover it or any data of it. If you want to still keep
 
 export const POSSIBLE_ACTIVITY_TYPES = [
   'login',
-  'register',
   'delete entry',
   'add entry',
   'edit entry',
@@ -25,12 +24,10 @@ export const POSSIBLE_ACTIVITY_TYPES = [
   'change password',
   'deactivate account',
   'reactivate account',
-  'delete account',
 ] as const;
 
 export const ACTIVITY_TYPES = {
   LOGIN: 'login',
-  REGISTER: 'register',
   DELETE_ENTRY: 'delete entry',
   ADD_ENTRY: 'add entry',
   EDIT_ENTRY: 'edit entry',
@@ -43,7 +40,6 @@ export const ACTIVITY_TYPES = {
   CHANGE_PASSWORD: 'change password',
   DEACTIVATE_ACCOUNT: 'deactivate account',
   REACTIVATE_ACCOUNT: 'reactivate account',
-  DELETE_ACCOUNT: 'delete account',
 };
 
 export const POSSIBLE_ENTRY_STATUS = ['active', 'expired'] as const;
