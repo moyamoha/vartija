@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
+import { Mfa } from 'src/types/custom';
+import { DEFAULT_MFA_SETTINGS } from 'src/utils/constants';
 
 export type UserDocument = Document & User;
 
@@ -39,11 +41,11 @@ export class User {
   @Prop({ default: false })
   isActive: boolean;
 
-  @Prop({ default: false })
-  mfaEnabled: boolean;
-
-  @Prop({ default: 0 })
-  verificationCode: number;
+  @Prop({
+    default: DEFAULT_MFA_SETTINGS,
+    type: mongoose.Schema.Types.Mixed,
+  })
+  mfa: Mfa;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

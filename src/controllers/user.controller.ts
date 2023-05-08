@@ -28,18 +28,15 @@ export class UserController {
   }
 
   @UseGuards(AuthTokenGaurd)
-  @Patch('toggle-mfa')
-  async toggleMfa(@Req() req: CustomReq, @Body('mfaEnabled') mfaEnabled) {
-    const updated = await this.userService.changeMfaState(
-      req.user._id,
-      mfaEnabled,
-    );
-    return {
-      email: updated.email,
-      firstname: updated.firstname,
-      lastname: updated.lastname,
-      mfaEnabled: updated.mfaEnabled,
-    };
+  @Patch('disable-mfa')
+  async disableMfa(@Req() req: CustomReq) {
+    await this.userService.disableMfa(req.user);
+  }
+
+  @UseGuards(AuthTokenGaurd)
+  @Patch('enable-mfa')
+  async enableMfa(@Req() req: CustomReq, @Body('token') token: string) {
+    await this.userService.enableMfa(req.user, token);
   }
 
   @Get('confirm')
@@ -84,5 +81,12 @@ export class UserController {
   @HttpCode(204)
   async clearActivityHistory(@Req() req: CustomReq) {
     await this.userService.clearActivityHistory(req.user._id);
+  }
+
+  @UseGuards(AuthTokenGaurd)
+  @Get('mfa-otpauthurl')
+  @HttpCode(200)
+  async getOtpAuthUrl(@Req() req: CustomReq) {
+    return await this.userService.getQrCodeUrl(req.user);
   }
 }

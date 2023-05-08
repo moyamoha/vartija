@@ -7,6 +7,11 @@ export interface CustomReq extends Request {
   user?: UserDocument;
 }
 
+export type Mfa = {
+  enabled: boolean;
+  userSecret: string;
+};
+
 export type ChangeCategoryPayload = {
   oldCategoryId: string;
   newCategoryId: string;

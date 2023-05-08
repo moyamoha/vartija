@@ -14,6 +14,7 @@ import {
   UserActivity,
   UserActivitySchema,
 } from 'src/schemas/user-activity.schema';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import {
       { name: User.name, schema: UserSchema },
       { name: UserActivity.name, schema: UserActivitySchema },
     ]),
+    CacheModule.register(),
   ],
   controllers: [AuthController],
   providers: [AuthService, UserService, LocalStrategy, TokenStrategy],

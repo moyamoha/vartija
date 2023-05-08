@@ -21,10 +21,10 @@ export class AuthController {
   @Post('/login')
   @HttpCode(200)
   async login(@Req() req: CustomReq) {
-    if (!req.user.mfaEnabled) {
+    if (!req.user.mfa.enabled) {
       return this.authService.login(req.user);
     } else {
-      return this.authService.sendVerificationCode(req.user);
+      return 'Waiting for the verification code ...';
     }
   }
 
@@ -35,11 +35,14 @@ export class AuthController {
   }
 
   @Post('/verify-code')
-  async verifyCode(@Body() body: { code: number }) {
-    if (body.code === 0) {
+  async verifyCode(@Body() body: { token: string; email: string }) {
+    if (!body.token) {
       throw new UnauthorizedException('Verification code can not be 0');
     }
-    return await this.authService.verifyLogin(body.code);
+    if (!body.email) {
+      throw new UnauthorizedException('User email is madatory');
+    }
+    return await this.authService.verifyLogin(body.email, body.token);
   }
 
   @Patch('/forgot-password')

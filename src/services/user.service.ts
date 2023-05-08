@@ -1,13 +1,18 @@
 import { MailerService } from '@nestjs-modules/mailer';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 // import { JwtService } from '@nestjs/jwt';
+import { Cache } from 'cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
+import speakeasy from 'speakeasy';
+
 import {
   UserActivity,
   UserActivityDocument,
@@ -21,6 +26,7 @@ import {
   mfaEnabledEmailResp,
   ACTIVITY_TYPES,
 } from 'src/utils/constants';
+import { throwNotFoundError } from 'src/utils/utility-functions';
 
 @Injectable()
 export class UserService {
@@ -29,6 +35,7 @@ export class UserService {
     @InjectModel(UserActivity.name)
     private userActivityModel: Model<UserActivity>,
     private mailerService: MailerService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async createUser(userObj: Partial<UserDocument>): Promise<UserDocument> {
@@ -64,7 +71,9 @@ export class UserService {
     return created;
   }
   async findOneByEmail(email: string): Promise<UserDocument> {
-    return await this.userModel.findOne({ email: email });
+    const user = await this.userModel.findOne({ email: email });
+    if (!user) throwNotFoundError('User', user.email);
+    return user;
   }
 
   async deactivate(user: UserDocument) {
@@ -111,35 +120,59 @@ export class UserService {
     return await this.userModel.find({ isActive: false });
   }
 
-  async changeMfaState(id: string, mfaEnabled: boolean): Promise<UserDocument> {
+  async disableMfa(user: UserDocument): Promise<UserDocument> {
     try {
-      const updated = await this.userModel.findByIdAndUpdate(
-        id,
-        { mfaEnabled: mfaEnabled },
-        { returnDocument: 'after' },
-      );
-      const bodyText = mfaEnabled ? mfaEnabledEmailResp : mfaDisabledEmailResp;
+      user.mfa = { enabled: false, userSecret: '' };
+      const updated = await user.save();
       await this.mailerService.sendMail({
         from: process.env.EMAIL_SENDER,
         to: updated.email,
-        subject: mfaEnabled
-          ? 'Your account is now SECURE'
-          : 'Oops! your account is VULNERABLE',
-        html: `<p><strong>Dear ${updated.firstname}!</strong><br></br>${bodyText}
+        subject: 'Oops! your account is VULNERABLE',
+        html: `<p><strong>Dear ${updated.firstname}!</strong><br></br>${mfaDisabledEmailResp}
         <br></br><i>Team Guardian.</i></p>`,
       });
-      const activityType = mfaEnabled
-        ? ACTIVITY_TYPES.ENABLE_2FA
-        : ACTIVITY_TYPES.DISABLE_2FA;
+      const activityType = ACTIVITY_TYPES.DISABLE_2FA;
       await new this.userActivityModel({
         userId: updated._id,
         activityType: activityType,
         timestamp: new Date(),
       }).save();
       return updated;
-    } catch (e) {
+    } catch (error) {
       throw new BadRequestException('Could not update user');
     }
+  }
+
+  async enableMfa(user: UserDocument, token: string): Promise<UserDocument> {
+    try {
+      const secret = (await this.cacheManager.get(
+        user._id + '_temp_secret',
+      )) as string;
+      const verified = speakeasy.totp.verify({
+        token: token,
+        secret: secret,
+      });
+      if (!verified) {
+        throw new BadRequestException('Wrong password');
+      }
+      user.mfa = { enabled: true, userSecret: secret };
+      const updated = await user.save();
+      await this.mailerService.sendMail({
+        from: process.env.EMAIL_SENDER,
+        to: updated.email,
+        subject: 'Your account is now SECURE',
+        html: `<p><strong>Dear ${updated.firstname}!</strong><br></br>${mfaEnabledEmailResp}
+        <br></br><i>Team Guardian.</i></p>`,
+      });
+      const activityType = ACTIVITY_TYPES.ENABLE_2FA;
+      await new this.userActivityModel({
+        userId: updated._id,
+        activityType: activityType,
+        timestamp: new Date(),
+      }).save();
+      await this.cacheManager.del(updated._id + '_temp_secret');
+      return updated;
+    } catch (error) {}
   }
 
   async changeName(
@@ -202,5 +235,11 @@ export class UserService {
 
   async clearActivityHistory(userId: string): Promise<void> {
     await this.userActivityModel.deleteMany({ userId: userId });
+  }
+
+  async getQrCodeUrl(user: UserDocument): Promise<string> {
+    const secret = speakeasy.generateSecret();
+    await this.cacheManager.set(user._id + '_temp_secret', secret);
+    return secret.otpauth_url;
   }
 }

@@ -43,3 +43,8 @@ export const ACTIVITY_TYPES = {
 };
 
 export const POSSIBLE_ENTRY_STATUS = ['active', 'expired'] as const;
+
+export const DEFAULT_MFA_SETTINGS = {
+  enabled: false,
+  userSecret: '',
+} as const;

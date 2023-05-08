@@ -14,6 +14,7 @@ import {
   UserActivity,
   UserActivitySchema,
 } from 'src/schemas/user-activity.schema';
+import { CacheModule } from '@nestjs/cache-manager';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -32,6 +33,7 @@ import {
       },
     }),
     ScheduleModule.forRoot(),
+    CacheModule.register(),
   ],
   controllers: [UserController],
   providers: [UserService, TaskService, UserService, CategoryService],
