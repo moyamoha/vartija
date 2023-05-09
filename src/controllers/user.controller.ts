@@ -36,7 +36,13 @@ export class UserController {
   @UseGuards(AuthTokenGaurd)
   @Patch('enable-mfa')
   async enableMfa(@Req() req: CustomReq, @Body('token') token: string) {
-    await this.userService.enableMfa(req.user, token);
+    const updated = await this.userService.enableMfa(req.user, token);
+    return {
+      email: updated.email,
+      firstname: updated.firstname,
+      lastname: updated.lastname,
+      mfaEnabled: true,
+    };
   }
 
   @Get('confirm')

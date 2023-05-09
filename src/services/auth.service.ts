@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import speakeasy from 'speakeasy';
+import * as speakeasy from 'speakeasy';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
@@ -80,6 +80,7 @@ export class AuthService {
     const verified = speakeasy.totp.verify({
       secret: secret,
       token: token,
+      encoding: 'base32',
     });
     if (verified) {
       await foundUser.save();
@@ -105,6 +106,13 @@ export class AuthService {
       subject: 'Reset password',
       html: `<p><strong>Dear ${user.firstname}!</strong><br></br>Use this password: <strong>${randomPassword}</strong> to log in. Please make sure to change it after you log in </strong>
       <br></br><i>Team Guardian.</i></p>`,
+    });
+  }
+
+  generateOtp(user: UserDocument) {
+    speakeasy.totp({
+      secret: user.mfa.userSecret,
+      encoding: 'base32',
     });
   }
 }

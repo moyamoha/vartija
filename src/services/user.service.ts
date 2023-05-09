@@ -11,7 +11,7 @@ import { Cache } from 'cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
-import speakeasy from 'speakeasy';
+import * as speakeasy from 'speakeasy';
 
 import {
   UserActivity,
@@ -151,6 +151,7 @@ export class UserService {
       const verified = speakeasy.totp.verify({
         token: token,
         secret: secret,
+        encoding: 'base32',
       });
       if (!verified) {
         throw new BadRequestException('Wrong password');
@@ -172,7 +173,9 @@ export class UserService {
       }).save();
       await this.cacheManager.del(updated._id + '_temp_secret');
       return updated;
-    } catch (error) {}
+    } catch (error) {
+      throw new BadRequestException(error.toString());
+    }
   }
 
   async changeName(
@@ -239,7 +242,18 @@ export class UserService {
 
   async getQrCodeUrl(user: UserDocument): Promise<string> {
     const secret = speakeasy.generateSecret();
-    await this.cacheManager.set(user._id + '_temp_secret', secret);
+    await this.cacheManager.set(user._id + '_temp_secret', secret.base32, 0);
     return secret.otpauth_url;
+  }
+
+  async generateToken(user: UserDocument): Promise<string> {
+    const secret = (await this.cacheManager.get(
+      user._id + '_temp_secret',
+    )) as string;
+    const token = speakeasy.totp({
+      secret: secret,
+      encoding: 'base32',
+    });
+    return token;
   }
 }

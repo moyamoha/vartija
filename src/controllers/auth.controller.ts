@@ -21,9 +21,11 @@ export class AuthController {
   @Post('/login')
   @HttpCode(200)
   async login(@Req() req: CustomReq) {
+    console.log(req.user);
     if (!req.user.mfa.enabled) {
-      return this.authService.login(req.user);
+      return await this.authService.login(req.user);
     } else {
+      this.authService.generateOtp(req.user);
       return 'Waiting for the verification code ...';
     }
   }
@@ -34,10 +36,10 @@ export class AuthController {
     await this.authService.singup(userData);
   }
 
-  @Post('/verify-code')
+  @Post('/verify-totp')
   async verifyCode(@Body() body: { token: string; email: string }) {
     if (!body.token) {
-      throw new UnauthorizedException('Verification code can not be 0');
+      throw new UnauthorizedException('Token cannot be empty');
     }
     if (!body.email) {
       throw new UnauthorizedException('User email is madatory');
