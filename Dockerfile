@@ -4,9 +4,9 @@ WORKDIR /vartija-backend
 
 COPY package*.json ./
 RUN npm run install
-COPY . .
+COPY . /vartija-backend
 
-EXPOSE 8080
+EXPOSE 5000
 
 RUN npm run build
 
