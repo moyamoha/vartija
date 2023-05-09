@@ -3,7 +3,7 @@ FROM node:lts
 WORKDIR /vartija-backend
 
 COPY package*.json ./
-RUN npm install
+RUN npm run install
 COPY . .
 
 EXPOSE 8080
