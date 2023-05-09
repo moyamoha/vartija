@@ -241,7 +241,10 @@ export class UserService {
   }
 
   async getQrCodeUrl(user: UserDocument): Promise<string> {
-    const secret = speakeasy.generateSecret();
+    const secret = speakeasy.generateSecret({
+      name: 'Guardian',
+      issuer: 'Guardian',
+    });
     await this.cacheManager.set(user._id + '_temp_secret', secret.base32, 0);
     return secret.otpauth_url;
   }
