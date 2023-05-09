@@ -3,7 +3,7 @@ FROM node:lts
 # Create app directory
 WORKDIR /vartija
 COPY package*.json ./
-RUN npm install
+RUN npm run install
 COPY . .
 
 EXPOSE 5000
