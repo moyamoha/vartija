@@ -2,12 +2,10 @@ FROM node:alpine
 
 WORKDIR /app/nestjs
 
-EXPOSE 3000
-COPY . /app/nestjs
+EXPOSE 5000
+COPY . .
 
 RUN npm install
 RUN npm run build
-
-USER 1000
 
 CMD ["npm", "run", "start:prod"]
