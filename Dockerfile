@@ -1,11 +1,13 @@
-FROM node:alpine
+FROM node:lts
 
-WORKDIR /app/nestjs
+WORKDIR /vartija-backend
 
-EXPOSE 5000
+COPY package*.json ./
+RUN npm install
 COPY . .
 
-RUN npm run install
+EXPOSE 8080
+
 RUN npm run build
 
 CMD ["npm", "run", "start:prod"]
