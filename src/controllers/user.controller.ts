@@ -95,10 +95,4 @@ export class UserController {
   async getOtpAuthUrl(@Req() req: CustomReq) {
     return await this.userService.getQrCodeUrl(req.user);
   }
-
-  @UseGuards(AuthTokenGaurd)
-  @Get('mfa-mfa')
-  async getMfa(@Req() req: CustomReq) {
-    return req.user.mfa.enabled;
-  }
 }

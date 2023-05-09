@@ -5,6 +5,7 @@ import {
   Patch,
   Post,
   Req,
+  Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -19,14 +20,14 @@ export class AuthController {
 
   @UseGuards(LocalAuthGaurd)
   @Post('/login')
-  @HttpCode(200)
-  async login(@Req() req: CustomReq) {
+  async login(@Req() req: CustomReq, @Res() res) {
     console.log(req.user);
     if (!req.user.mfa.enabled) {
-      return await this.authService.login(req.user);
+      const loginResponseObj = await this.authService.login(req.user);
+      return res.status(200).json(loginResponseObj);
     } else {
       this.authService.generateOtp(req.user);
-      return 'Waiting for the verification code ...';
+      return res.status(202).send('Verification code Required');
     }
   }
 
