@@ -248,15 +248,4 @@ export class UserService {
     await this.cacheManager.set(user._id + '_temp_secret', secret.base32, 0);
     return secret.otpauth_url;
   }
-
-  async generateToken(user: UserDocument): Promise<string> {
-    const secret = (await this.cacheManager.get(
-      user._id + '_temp_secret',
-    )) as string;
-    const token = speakeasy.totp({
-      secret: secret,
-      encoding: 'base32',
-    });
-    return token;
-  }
 }
