@@ -9,6 +9,7 @@ import {
   Put,
   Query,
   Req,
+  Sse,
   UseGuards,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
@@ -105,5 +106,19 @@ export class UserController {
       lastname: req.user.lastname,
       mfaEnabled: req.user.mfa.enabled,
     };
+  }
+
+  @UseGuards(AuthTokenGaurd)
+  @Get('user-deactivation')
+  @Sse('user-deactivation')
+  async getUserDeactivation(@Req() req: CustomReq) {
+    if (!req.user.isActive) {
+      return {
+        event: 'user-deactivation',
+        data: {
+          message: 'User deactivated',
+        },
+      };
+    }
   }
 }
