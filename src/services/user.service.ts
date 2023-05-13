@@ -13,29 +13,24 @@ import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import * as speakeasy from 'speakeasy';
 
-import {
-  UserActivity,
-  UserActivityDocument,
-} from 'src/schemas/user-activity.schema';
-
 import { User, UserDocument } from 'src/schemas/user.schema';
 import {
   mfaDisabledEmailResp,
   accountDeactivedEmailResp,
   accountDeletedEmailResp,
   mfaEnabledEmailResp,
-  ACTIVITY_TYPES,
 } from 'src/utils/constants';
 import { throwNotFoundError } from 'src/utils/utility-functions';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { getProfileUpdateEventPayload } from 'src/utils/random';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(UserActivity.name)
-    private userActivityModel: Model<UserActivity>,
     private mailerService: MailerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createUser(userObj: Partial<UserDocument>): Promise<UserDocument> {
@@ -86,12 +81,11 @@ export class UserService {
         html: `<p><strong>Dear ${user.firstname}!</strong><br></br>${accountDeactivedEmailResp}
         <br></br><i>Team Guardian.</i></p>`,
       });
-      await user.save();
-      await new this.userActivityModel({
-        userId: user._id,
-        activityType: ACTIVITY_TYPES.DEACTIVATE_ACCOUNT,
-        timestamp: new Date(),
-      }).save();
+      const updated = await user.save();
+      this.eventEmitter.emit(
+        'profile-update',
+        getProfileUpdateEventPayload(updated),
+      );
     } catch (e) {}
   }
 
@@ -131,12 +125,10 @@ export class UserService {
         html: `<p><strong>Dear ${updated.firstname}!</strong><br></br>${mfaDisabledEmailResp}
         <br></br><i>Team Guardian.</i></p>`,
       });
-      const activityType = ACTIVITY_TYPES.DISABLE_2FA;
-      await new this.userActivityModel({
-        userId: updated._id,
-        activityType: activityType,
-        timestamp: new Date(),
-      }).save();
+      this.eventEmitter.emit(
+        'profile-update',
+        getProfileUpdateEventPayload(updated),
+      );
       return updated;
     } catch (error) {
       throw new BadRequestException('Could not update user');
@@ -165,13 +157,11 @@ export class UserService {
         html: `<p><strong>Dear ${updated.firstname}!</strong><br></br>${mfaEnabledEmailResp}
         <br></br><i>Team Guardian.</i></p>`,
       });
-      const activityType = ACTIVITY_TYPES.ENABLE_2FA;
-      await new this.userActivityModel({
-        userId: updated._id,
-        activityType: activityType,
-        timestamp: new Date(),
-      }).save();
       await this.cacheManager.del(updated._id + '_temp_secret');
+      this.eventEmitter.emit(
+        'profile-update',
+        getProfileUpdateEventPayload(updated),
+      );
       return updated;
     } catch (error) {
       throw new BadRequestException(error.toString());
@@ -185,12 +175,11 @@ export class UserService {
     user.firstname = body.firstname;
     user.lastname = body.lastname;
     try {
-      await user.save();
-      await new this.userActivityModel({
-        userId: user._id,
-        activityType: ACTIVITY_TYPES.CHANGE_NAME,
-        timestamp: new Date(),
-      }).save();
+      const updated = await user.save();
+      this.eventEmitter.emit(
+        'profile-update',
+        getProfileUpdateEventPayload(updated),
+      );
     } catch (e) {
       throw new BadRequestException(e, e.message);
     }
@@ -214,11 +203,6 @@ export class UserService {
       }
       user.password = await bcrypt.hash(body.newPassword, 10);
       await user.save({ validateBeforeSave: false });
-      await new this.userActivityModel({
-        userId: user._id,
-        activityType: ACTIVITY_TYPES.CHANGE_PASSWORD,
-        timestamp: new Date(),
-      }).save();
     } catch (e) {
       throw new BadRequestException(e, e.message);
     }
@@ -226,18 +210,6 @@ export class UserService {
 
   async findUserByCode(code: number): Promise<UserDocument> {
     return await this.userModel.findOne({ verificationCode: code });
-  }
-
-  async getActivityHistory(userId: string): Promise<UserActivityDocument[]> {
-    let history = [];
-    history = await this.userActivityModel
-      .find({ userId: userId })
-      .sort({ timestamp: -1 });
-    return history;
-  }
-
-  async clearActivityHistory(userId: string): Promise<void> {
-    await this.userActivityModel.deleteMany({ userId: userId });
   }
 
   async getQrCodeUrl(user: UserDocument): Promise<string> {

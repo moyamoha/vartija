@@ -13,11 +13,9 @@ import * as speakeasy from 'speakeasy';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
-import { UserActivity } from 'src/schemas/user-activity.schema';
 import { UserDocument } from 'src/schemas/user.schema';
 import { UserService } from './user.service';
 import { randomPass } from 'src/utils/random';
-import { ACTIVITY_TYPES } from 'src/utils/constants';
 
 @Injectable()
 export class AuthService {
@@ -25,8 +23,6 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private mailerService: MailerService,
-    @InjectModel(UserActivity.name)
-    private userActivityModel: Model<UserActivity>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -34,11 +30,6 @@ export class AuthService {
     user.lastLoggedIn = new Date();
     if (!user.isActive) {
       user.isActive = true;
-      await new this.userActivityModel({
-        userId: user._id,
-        activityType: ACTIVITY_TYPES.REACTIVATE_ACCOUNT,
-        timestamp: new Date(),
-      }).save();
     }
     const payload = {
       email: user.email,
@@ -50,11 +41,6 @@ export class AuthService {
       secret: process.env.JWT_SECRET,
     });
     await user.save();
-    await new this.userActivityModel({
-      userId: user._id,
-      activityType: ACTIVITY_TYPES.LOGIN,
-      timestamp: new Date(),
-    }).save();
     return { accessToken };
   }
 

@@ -20,22 +20,8 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @UseGuards(AuthTokenGaurd)
   @Sse('notifications')
-  sse(@Req() req: CustomReq): Observable<MessageEvent> {
-    return interval(1000).pipe(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      map((_) => ({
-        data: {
-          isActive: req.user.isActive,
-          profile: {
-            firstName: req.user.firstname,
-            lastName: req.user.lastname,
-            email: req.user.email,
-            mfaEnabled: req.user.mfa.enabled,
-          },
-        },
-      })),
-    );
+  sse(): Observable<MessageEvent> {
+    return interval(1000).pipe(map((_) => ({ data: { hello: 'world' } })));
   }
 }

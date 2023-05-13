@@ -10,10 +10,6 @@ import { User, UserSchema } from 'src/schemas/user.schema';
 import { AuthService } from 'src/services/auth.service';
 import { UserService } from 'src/services/user.service';
 import { UserModule } from './user.module';
-import {
-  UserActivity,
-  UserActivitySchema,
-} from 'src/schemas/user-activity.schema';
 import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
@@ -26,10 +22,7 @@ import { CacheModule } from '@nestjs/cache-manager';
         expiresIn: '7d',
       },
     }),
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      { name: UserActivity.name, schema: UserActivitySchema },
-    ]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     CacheModule.register(),
   ],
   controllers: [AuthController],

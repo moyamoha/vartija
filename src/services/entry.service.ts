@@ -7,10 +7,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
-import { UserActivity } from 'src/schemas/user-activity.schema';
 import { UserDocument } from 'src/schemas/user.schema';
 import { ChangeCategoryPayload } from 'src/types/custom';
-import { ACTIVITY_TYPES } from 'src/utils/constants';
 import { throwNotFoundError } from 'src/utils/utility-functions';
 
 @Injectable()
@@ -18,8 +16,6 @@ export class EntryService {
   constructor(
     @InjectModel(Entry.name) private entryModel: Model<EntryDocument>,
     @InjectModel(Category.name) private categModel: Model<CategoryDocument>,
-    @InjectModel(UserActivity.name)
-    private userActivityModel: Model<UserActivity>,
   ) {}
 
   async getEntries(
@@ -77,11 +73,6 @@ export class EntryService {
       category.items.push(entry._id);
       await category.save();
       const result = await entry.save();
-      await new this.userActivityModel({
-        userId: ownerId,
-        activityType: ACTIVITY_TYPES.ADD_ENTRY,
-        timestamp: new Date(),
-      }).save();
       return result;
     } catch (e) {
       throw new BadRequestException(e, e.message);
@@ -115,11 +106,6 @@ export class EntryService {
         { returnDocument: 'after', runValidators: true },
       );
       // await updated.validate();
-      await new this.userActivityModel({
-        userId: ownerId,
-        activityType: ACTIVITY_TYPES.EDIT_ENTRY,
-        timestamp: new Date(),
-      }).save();
       return updated;
     } catch (e) {
       throw new BadRequestException(e, e.message);
@@ -142,11 +128,6 @@ export class EntryService {
       await entry.save();
       await oldCategory.save();
       await newCategory.save();
-      await new this.userActivityModel({
-        userId: entry.owner,
-        activityType: ACTIVITY_TYPES.EDIT_ENTRY,
-        timestamp: new Date(),
-      }).save();
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
@@ -166,10 +147,5 @@ export class EntryService {
     await this.categModel.findByIdAndUpdate(deleted.category, {
       $pull: { items: deleted._id },
     });
-    await new this.userActivityModel({
-      userId: ownerId,
-      activityType: ACTIVITY_TYPES.DELETE_ENTRY,
-      timestamp: new Date(),
-    }).save();
   }
 }
