@@ -10,7 +10,6 @@ import {
   Query,
   Req,
   UseGuards,
-  Sse,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
@@ -24,15 +23,8 @@ export class UserController {
 
   @UseGuards(AuthTokenGaurd)
   @Patch('deactivate')
-  @Sse('user-deactivation')
   async deactivateAccount(@Req() req: CustomReq) {
     await this.userService.deactivate(req.user);
-    return {
-      event: 'user-deactivation',
-      data: {
-        message: 'User deactivated',
-      },
-    };
   }
 
   @UseGuards(AuthTokenGaurd)
