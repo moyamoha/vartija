@@ -11,7 +11,6 @@ import { UserController } from '../controllers/user.controller';
 import { TaskService } from 'src/services/task.service';
 import { UserService } from '../services/user.service';
 import { CacheModule } from '@nestjs/cache-manager';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -30,7 +29,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
     ScheduleModule.forRoot(),
     CacheModule.register(),
-    EventEmitterModule.forRoot(),
   ],
   controllers: [UserController],
   providers: [UserService, TaskService, UserService, CategoryService],

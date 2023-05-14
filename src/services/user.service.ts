@@ -21,8 +21,6 @@ import {
   mfaEnabledEmailResp,
 } from 'src/utils/constants';
 import { throwNotFoundError } from 'src/utils/utility-functions';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { getProfileUpdateEventPayload } from 'src/utils/random';
 
 @Injectable()
 export class UserService {
@@ -30,7 +28,6 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private mailerService: MailerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createUser(userObj: Partial<UserDocument>): Promise<UserDocument> {
@@ -81,11 +78,7 @@ export class UserService {
         html: `<p><strong>Dear ${user.firstname}!</strong><br></br>${accountDeactivedEmailResp}
         <br></br><i>Team Guardian.</i></p>`,
       });
-      const updated = await user.save();
-      this.eventEmitter.emit(
-        'profile-update',
-        getProfileUpdateEventPayload(updated),
-      );
+      await user.save();
     } catch (e) {}
   }
 
@@ -125,10 +118,6 @@ export class UserService {
         html: `<p><strong>Dear ${updated.firstname}!</strong><br></br>${mfaDisabledEmailResp}
         <br></br><i>Team Guardian.</i></p>`,
       });
-      this.eventEmitter.emit(
-        'profile-update',
-        getProfileUpdateEventPayload(updated),
-      );
       return updated;
     } catch (error) {
       throw new BadRequestException('Could not update user');
@@ -158,10 +147,6 @@ export class UserService {
         <br></br><i>Team Guardian.</i></p>`,
       });
       await this.cacheManager.del(updated._id + '_temp_secret');
-      this.eventEmitter.emit(
-        'profile-update',
-        getProfileUpdateEventPayload(updated),
-      );
       return updated;
     } catch (error) {
       throw new BadRequestException(error.toString());
@@ -175,11 +160,7 @@ export class UserService {
     user.firstname = body.firstname;
     user.lastname = body.lastname;
     try {
-      const updated = await user.save();
-      this.eventEmitter.emit(
-        'profile-update',
-        getProfileUpdateEventPayload(updated),
-      );
+      await user.save();
     } catch (e) {
       throw new BadRequestException(e, e.message);
     }
