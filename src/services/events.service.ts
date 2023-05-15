@@ -25,11 +25,18 @@ export class EventsGateway {
 
   @SubscribeMessage('profile-updated')
   handleProfileUpdate(client: Socket, room: string) {
-    this.server.to(room).emit('profile-updated', 'Profile updated');
+    this.server
+      .to(room)
+      .emit(
+        'profile-updated',
+        'Profile updated, please fetch the profile again',
+      );
   }
 
   @SubscribeMessage('user-deactivated')
   handleUserDeactivated(client: Socket, room: string) {
-    this.server.to(room).emit('user-deactivated', 'User deactivated');
+    this.server
+      .to(room)
+      .emit('user-deactivated', 'User deactivated. Kindly logout');
   }
 }
