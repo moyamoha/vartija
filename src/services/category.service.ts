@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Console } from 'console';
 import { Model } from 'mongoose';
 
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
@@ -61,7 +60,6 @@ export class CategoryService {
       owner: ownerId,
       _id: id,
     });
-    console.log(categoryBeforeDeletion);
     if (!categoryBeforeDeletion) {
       throw new NotFoundException(`Category ${id} was not found`);
     }
