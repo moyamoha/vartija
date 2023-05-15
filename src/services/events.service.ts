@@ -15,7 +15,6 @@ export class EventsGateway {
   @SubscribeMessage('joinRoom')
   handleJoinRoom(client: Socket, room: string) {
     client.join(room);
-    console.log(`Client ${client.id} joined room ${room}`);
   }
 
   @SubscribeMessage('leaveRoom')

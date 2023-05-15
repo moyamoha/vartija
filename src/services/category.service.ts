@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Console } from 'console';
 import { Model } from 'mongoose';
 
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
@@ -57,9 +58,10 @@ export class CategoryService {
 
   async deleteCategory(id: string, ownerId: string): Promise<void> {
     const categoryBeforeDeletion = await this.categoryModel.findOneAndDelete({
+      owner: ownerId,
       _id: id,
-      ownerId: ownerId,
     });
+    console.log(categoryBeforeDeletion);
     if (!categoryBeforeDeletion) {
       throw new NotFoundException(`Category ${id} was not found`);
     }
