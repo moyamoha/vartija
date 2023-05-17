@@ -22,7 +22,10 @@ export class UserController {
 
   @UseGuards(AuthTokenGaurd)
   @Patch('deactivate')
-  async deactivateAccount(@Req() req: CustomReq) {
+  async deactivateAccount(
+    @Req() req: CustomReq,
+    @Body('password') password: string,
+  ) {
     await this.userService.deactivate(req.user);
   }
 

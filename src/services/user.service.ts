@@ -68,7 +68,11 @@ export class UserService {
     return user;
   }
 
-  async deactivate(user: UserDocument) {
+  async deactivate(user: UserDocument, password: string) {
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      throw new BadRequestException('Incorrect password');
+    }
     try {
       user.isActive = false;
       await this.mailerService.sendMail({
