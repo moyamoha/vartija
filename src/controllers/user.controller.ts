@@ -26,7 +26,7 @@ export class UserController {
     @Req() req: CustomReq,
     @Body('password') password: string,
   ) {
-    await this.userService.deactivate(req.user);
+    await this.userService.deactivate(req.user, password);
   }
 
   @UseGuards(AuthTokenGaurd)
