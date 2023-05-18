@@ -38,4 +38,9 @@ export class EventsGateway {
       .to(room)
       .emit('user-deactivated', 'User deactivated. Kindly logout');
   }
+
+  @SubscribeMessage('content-changed')
+  handleContentChanged(client: Socket, room: string) {
+    client.broadcast.to(room).emit('content-changed', 'Content changed');
+  }
 }
