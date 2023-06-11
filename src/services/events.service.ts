@@ -4,8 +4,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-// import { UseInterceptors } from '@nestjs/common';
-// import { CorsInterceptor } from 'src/interceptors/cors.interceptor';
 
 @WebSocketGateway({ cors: true })
 export class EventsGateway {
