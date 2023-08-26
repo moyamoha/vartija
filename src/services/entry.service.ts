@@ -8,8 +8,11 @@ import { Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
 import { UserDocument } from 'src/schemas/user.schema';
-import { ChangeCategoryPayload } from 'src/types/custom';
-import { throwNotFoundError } from 'src/utils/utility-functions';
+import { ChangeCategoryPayload, GetEntriesQuery } from 'src/types/custom';
+import {
+  getFilterForGettingEntries,
+  throwNotFoundError,
+} from 'src/utils/utility-functions';
 
 @Injectable()
 export class EntryService {
@@ -20,23 +23,13 @@ export class EntryService {
 
   async getEntries(
     user: UserDocument,
-    categoryId?: string,
+    query: GetEntriesQuery,
   ): Promise<EntryDocument[]> {
-    let entries = [];
-    if (categoryId) {
-      const category = await this.categModel.findById(categoryId);
-      if (!category) throwNotFoundError('Category', categoryId);
-
-      entries = await this.entryModel.find({
-        owner: user._id,
-        category: categoryId,
-      });
-    } else {
-      entries = await this.entryModel.find({
-        owner: user._id,
-      });
-      // .populate('category', { name: 1 });
-    }
+    const filter = getFilterForGettingEntries(query);
+    const entries = await this.entryModel.find({
+      owner: user._id,
+      ...filter,
+    });
     return entries;
   }
 

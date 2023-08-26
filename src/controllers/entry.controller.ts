@@ -26,9 +26,14 @@ export class EntryController {
   constructor(private entryService: EntryService) {}
 
   @Get('')
-  async getEntries(@Req() req: CustomReq, @Query('categoryId') categId) {
-    if (categId) return await this.entryService.getEntries(req.user, categId);
-    else return await this.entryService.getEntries(req.user);
+  async getEntries(
+    @Req() req: CustomReq,
+    @Query('category') category,
+    @Query('status') status,
+    @Query('search') search,
+  ) {
+    const q = { category, status, search };
+    return await this.entryService.getEntries(req.user, q);
   }
 
   @Get(':id')
