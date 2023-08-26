@@ -26,10 +26,12 @@ export class EntryService {
     query: GetEntriesQuery,
   ): Promise<EntryDocument[]> {
     const filter = getFilterForGettingEntries(query);
-    const entries = await this.entryModel.find({
-      owner: user._id,
-      ...filter,
-    });
+    const entries = await this.entryModel
+      .find({
+        owner: user._id,
+        ...filter,
+      })
+      .sort({ title: 1 });
     return entries;
   }
 
