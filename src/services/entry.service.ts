@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ObjectId } from 'mongodb';
 import { Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
@@ -63,7 +64,7 @@ export class EntryService {
       const entry = new this.entryModel({
         ...body,
         owner: ownerId,
-        category: categoryId,
+        category: new ObjectId(categoryId),
       });
       category.items.push(entry._id);
       await category.save();
@@ -82,7 +83,7 @@ export class EntryService {
     if (entryObj.category) {
       // Check if the category id is correct and exists
       const categ = await this.categModel.findOne({
-        _id: entryObj.category,
+        _id: new ObjectId(entryObj.category),
         owner: ownerId,
       });
       if (!categ) {
