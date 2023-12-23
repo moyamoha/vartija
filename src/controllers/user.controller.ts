@@ -15,6 +15,11 @@ import * as bcrypt from 'bcrypt';
 import { AuthTokenGaurd } from 'src/config/auth-token.gaurd';
 import { UserService } from 'src/services/user.service';
 import { CustomReq } from 'src/types/custom';
+import {
+  ChangeNamePayload,
+  DeactivateAccountPayload,
+  EnableMfaPayload,
+} from 'src/utils/dtos/user';
 
 @Controller('users')
 export class UserController {
@@ -24,9 +29,9 @@ export class UserController {
   @Patch('deactivate')
   async deactivateAccount(
     @Req() req: CustomReq,
-    @Body('password') password: string,
+    @Body() payload: DeactivateAccountPayload,
   ) {
-    await this.userService.deactivate(req.user, password);
+    await this.userService.deactivate(req.user, payload.password);
   }
 
   @UseGuards(AuthTokenGaurd)
@@ -37,8 +42,8 @@ export class UserController {
 
   @UseGuards(AuthTokenGaurd)
   @Patch('enable-mfa')
-  async enableMfa(@Req() req: CustomReq, @Body('token') token: string) {
-    const updated = await this.userService.enableMfa(req.user, token);
+  async enableMfa(@Req() req: CustomReq, @Body() payload: EnableMfaPayload) {
+    const updated = await this.userService.enableMfa(req.user, payload.token);
     return {
       email: updated.email,
       firstname: updated.firstname,
@@ -54,11 +59,8 @@ export class UserController {
 
   @UseGuards(AuthTokenGaurd)
   @Put('change-name')
-  async changeName(
-    @Req() req: CustomReq,
-    @Body() body: { firstname: string; lastname: string },
-  ) {
-    await this.userService.changeName(req.user, body);
+  async changeName(@Req() req: CustomReq, @Body() payload: ChangeNamePayload) {
+    await this.userService.changeName(req.user, payload);
   }
 
   @UseGuards(AuthTokenGaurd)

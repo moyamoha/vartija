@@ -11,7 +11,7 @@ export class Category {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   owner: mongoose.Types.ObjectId;
 
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Entry' })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Entry', default: [] })
   items: mongoose.Types.ObjectId[];
 }
 

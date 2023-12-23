@@ -11,11 +11,6 @@ export type Mfa = {
   userSecret: string;
 };
 
-export type ChangeCategoryPayload = {
-  oldCategoryId: string;
-  newCategoryId: string;
-};
-
 export type ResourseType = 'Category' | 'Entry' | 'User';
 
 export type EntryStatus = (typeof POSSIBLE_ENTRY_STATUS)[number];

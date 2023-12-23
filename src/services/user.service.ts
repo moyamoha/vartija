@@ -21,6 +21,7 @@ import {
   mfaEnabledEmailResp,
 } from 'src/utils/constants';
 import { throwNotFoundError } from 'src/utils/utility-functions';
+import { ChangeNamePayload, CreateUserDto } from 'src/utils/dtos/user';
 
 @Injectable()
 export class UserService {
@@ -30,7 +31,7 @@ export class UserService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async createUser(userObj: Partial<UserDocument>): Promise<UserDocument> {
+  async createUser(userObj: CreateUserDto): Promise<UserDocument> {
     let created: UserDocument;
     try {
       const mockUser = new this.userModel(userObj);
@@ -157,10 +158,7 @@ export class UserService {
     }
   }
 
-  async changeName(
-    user: UserDocument,
-    body: { firstname: string; lastname: string },
-  ): Promise<void> {
+  async changeName(user: UserDocument, body: ChangeNamePayload): Promise<void> {
     user.firstname = body.firstname;
     user.lastname = body.lastname;
     try {

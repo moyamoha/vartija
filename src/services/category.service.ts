@@ -8,6 +8,7 @@ import { Model } from 'mongoose';
 
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
+import { CreateCategoryPayload } from 'src/utils/dtos/category';
 
 @Injectable()
 export class CategoryService {
@@ -27,7 +28,7 @@ export class CategoryService {
   }
 
   async createCategory(
-    data: Partial<CategoryDocument>,
+    data: CreateCategoryPayload,
     ownerId: string,
   ): Promise<CategoryDocument> {
     try {

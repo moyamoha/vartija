@@ -9,7 +9,8 @@ import { Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
 import { UserDocument } from 'src/schemas/user.schema';
-import { ChangeCategoryPayload, GetEntriesQuery } from 'src/types/custom';
+import { GetEntriesQuery } from 'src/types/custom';
+import { ChangeCategoryPayload, EditEntryPayload } from 'src/utils/dtos/entry';
 import {
   getFilterForGettingEntries,
   throwNotFoundError,
@@ -75,11 +76,7 @@ export class EntryService {
     }
   }
 
-  async editEntry(
-    ownerId: string,
-    id: string,
-    entryObj: Partial<EntryDocument>,
-  ) {
+  async editEntry(ownerId: string, id: string, entryObj: EditEntryPayload) {
     if (entryObj.category) {
       // Check if the category id is correct and exists
       const categ = await this.categModel.findOne({

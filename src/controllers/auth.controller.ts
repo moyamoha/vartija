@@ -13,6 +13,11 @@ import {
 import { LocalAuthGaurd } from 'src/config/auth-local.gaurd';
 import { AuthService } from 'src/services/auth.service';
 import { CustomReq } from 'src/types/custom';
+import {
+  CreateUserDto,
+  ResetPasswordPayload,
+  VerifyCodePayloaed,
+} from 'src/utils/dtos/user';
 
 @Controller('auth')
 export class AuthController {
@@ -32,12 +37,12 @@ export class AuthController {
 
   @Post('/signup')
   @HttpCode(201)
-  async signup(@Body() userData) {
+  async signup(@Body() userData: CreateUserDto) {
     await this.authService.singup(userData);
   }
 
   @Post('/verify-totp')
-  async verifyCode(@Body() body: { token: string; email: string }) {
+  async verifyCode(@Body() body: VerifyCodePayloaed) {
     if (!body.token) {
       throw new UnauthorizedException('Token cannot be empty');
     }
@@ -48,7 +53,7 @@ export class AuthController {
   }
 
   @Patch('/forgot-password')
-  async resetPassword(@Body() body: { email: string }) {
+  async resetPassword(@Body() body: ResetPasswordPayload) {
     await this.authService.sendTemporaryPassword(body.email);
   }
 }

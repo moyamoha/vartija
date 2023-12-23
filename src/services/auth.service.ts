@@ -14,6 +14,7 @@ import { Cache } from 'cache-manager';
 import { UserDocument } from 'src/schemas/user.schema';
 import { UserService } from './user.service';
 import { randomPass } from 'src/utils/random';
+import { CreateUserDto } from 'src/utils/dtos/user';
 
 @Injectable()
 export class AuthService {
@@ -51,7 +52,7 @@ export class AuthService {
     return null;
   }
 
-  async singup(userObj: Partial<UserDocument>) {
+  async singup(userObj: CreateUserDto) {
     await this.userService.createUser(userObj);
   }
 

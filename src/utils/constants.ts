@@ -16,3 +16,6 @@ export const DEFAULT_MFA_SETTINGS = {
   enabled: false,
   userSecret: '',
 } as const;
+
+// Errors
+export const SHOULD_BE_MONGO_ID = 'Id should be mongo id';

@@ -11,15 +11,6 @@ export class User {
     required: true,
     index: true,
     unique: true,
-    trim: true,
-    lowercase: true,
-    validate: {
-      validator: (v) =>
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-          v,
-        ),
-      message: 'The format of email provided is wrong',
-    },
   })
   email: string;
 

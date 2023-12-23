@@ -11,15 +11,18 @@ import {
   Query,
   Req,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { AuthTokenGaurd } from 'src/config/auth-token.gaurd';
-import { ErrorsInterceptor } from 'src/interceptors/error.interceptor';
-import { EntryDocument } from 'src/schemas/entry.schema';
 import { EntryService } from 'src/services/entry.service';
-import { ChangeCategoryPayload, CustomReq } from 'src/types/custom';
+import { CustomReq } from 'src/types/custom';
+import {
+  CategoryIdInQuery,
+  ChangeCategoryPayload,
+  CreateEntryPayload,
+  EditEntryPayload,
+} from 'src/utils/dtos/entry';
+import { IdInParams } from 'src/utils/dtos/mongo';
 
-@UseInterceptors(ErrorsInterceptor)
 @UseGuards(AuthTokenGaurd)
 @Controller('entries')
 export class EntryController {
@@ -37,40 +40,44 @@ export class EntryController {
   }
 
   @Get(':id')
-  async getEntry(@Req() req: CustomReq, @Param('id') id) {
-    return await this.entryService.getEntry(req.user._id, id);
+  async getEntry(@Req() req: CustomReq, @Param() params: IdInParams) {
+    return await this.entryService.getEntry(req.user._id, params.id);
   }
 
   @Put(':id')
   async editEntry(
     @Req() req: CustomReq,
-    @Param('id') id,
-    @Body() entryObj: Partial<EntryDocument>,
+    @Param() params: IdInParams,
+    @Body() payload: EditEntryPayload,
   ) {
-    return await this.entryService.editEntry(req.user._id, id, entryObj);
+    return await this.entryService.editEntry(req.user._id, params.id, payload);
   }
 
   @Post('')
   async addEntry(
-    @Body() body,
+    @Body() body: CreateEntryPayload,
     @Req() req: CustomReq,
-    @Query('categoryId') categoryId,
+    @Query() query: CategoryIdInQuery,
   ) {
-    return await this.entryService.createEntry(body, req.user._id, categoryId);
+    return await this.entryService.createEntry(
+      body,
+      req.user._id,
+      query.categoryId,
+    );
   }
 
   @HttpCode(204)
   @Delete(':id')
-  async deleteEntry(@Req() req: CustomReq, @Param('id') id) {
-    return await this.entryService.deleteEntry(req.user._id, id);
+  async deleteEntry(@Req() req: CustomReq, @Param() params: IdInParams) {
+    return await this.entryService.deleteEntry(req.user._id, params.id);
   }
 
   @HttpCode(200)
   @Patch(':id/change-category')
   async changeEntryCategory(
-    @Param('id') identity,
+    @Param() params: IdInParams,
     @Body() body: ChangeCategoryPayload,
   ) {
-    await this.entryService.changeEntryCategory(identity, body);
+    await this.entryService.changeEntryCategory(params.id, body);
   }
 }
