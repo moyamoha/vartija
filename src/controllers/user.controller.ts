@@ -8,11 +8,14 @@ import {
   Put,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { Response } from 'express';
 
 import { AuthTokenGaurd } from 'src/config/auth-token.gaurd';
+import { writeUserDataToExcel } from 'src/services/download-data/excel';
 import { UserService } from 'src/services/user.service';
 import { CustomReq } from 'src/types/custom';
 import {
@@ -96,5 +99,19 @@ export class UserController {
       lastname: req.user.lastname,
       mfaEnabled: req.user.mfa.enabled,
     };
+  }
+
+  @UseGuards(AuthTokenGaurd)
+  @Get('download-data')
+  async downloadData(@Req() req: CustomReq, @Res() res: Response) {
+    const data = await this.userService.getUserData(req.user);
+    const wb = writeUserDataToExcel(data);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader('Content-Disposition', 'attachment; filename="data.xlsx"');
+    const buffer = await wb.xlsx.writeBuffer();
+    res.send(buffer);
   }
 }

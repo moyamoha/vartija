@@ -11,6 +11,7 @@ import { AuthService } from 'src/services/auth.service';
 import { UserService } from 'src/services/user.service';
 import { UserModule } from './user.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { Category, CategorySchema } from 'src/schemas/category.schema';
 
 @Module({
   imports: [
@@ -22,7 +23,10 @@ import { CacheModule } from '@nestjs/cache-manager';
         expiresIn: '7d',
       },
     }),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Category.name, schema: CategorySchema },
+    ]),
     CacheModule.register(),
   ],
   controllers: [AuthController],

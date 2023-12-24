@@ -22,11 +22,13 @@ import {
 } from 'src/utils/constants';
 import { throwNotFoundError } from 'src/utils/utility-functions';
 import { ChangeNamePayload, CreateUserDto } from 'src/utils/dtos/user';
+import { Category, CategoryDocument } from 'src/schemas/category.schema';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
     private mailerService: MailerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
@@ -202,5 +204,12 @@ export class UserService {
     });
     await this.cacheManager.set(user._id + '_temp_secret', secret.base32, 0);
     return secret.otpauth_url;
+  }
+
+  async getUserData(user: UserDocument) {
+    const categories = await this.categoryModel
+      .find({ owner: user._id })
+      .populate('items');
+    return categories;
   }
 }
