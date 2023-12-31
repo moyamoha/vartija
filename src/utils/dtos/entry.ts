@@ -51,11 +51,13 @@ export class EditEntryPayload {
   title: string;
 
   @IsOptional()
+  @IsString()
   @MinLength(3)
   username: string;
 
   @IsOptional()
-  @IsStrongPassword({ minLength: 5 })
+  @IsString()
+  @MinLength(5)
   password: string;
 
   @IsOptional()
