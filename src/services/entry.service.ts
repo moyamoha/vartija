@@ -5,8 +5,11 @@ import { Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
 import { UserDocument } from 'src/schemas/user.schema';
-import { GetEntriesQuery } from 'src/types/custom';
-import { ChangeCategoryPayload, EditEntryPayload } from 'src/utils/dtos/entry';
+import {
+  ChangeCategoryPayload,
+  EditEntryPayload,
+  EntrySearchQuery,
+} from 'src/utils/dtos/entry';
 import {
   getFilterForGettingEntries,
   throwNotFoundError,
@@ -21,7 +24,7 @@ export class EntryService {
 
   async getEntries(
     user: UserDocument,
-    query: GetEntriesQuery,
+    query: EntrySearchQuery,
   ): Promise<EntryDocument[]> {
     const filter = getFilterForGettingEntries(query);
     const entries = await this.entryModel

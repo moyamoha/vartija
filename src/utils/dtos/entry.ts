@@ -72,3 +72,19 @@ export class EditEntryPayload {
   @IsIn(['active', 'expired'])
   status: 'active' | 'expired';
 }
+
+export class EntrySearchQuery {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  search: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['active', 'expired'])
+  status: string;
+
+  @IsOptional()
+  @IsMongoId()
+  category: string;
+}

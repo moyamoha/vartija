@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -20,6 +21,7 @@ import {
   ChangeCategoryPayload,
   CreateEntryPayload,
   EditEntryPayload,
+  EntrySearchQuery,
 } from 'src/utils/dtos/entry';
 import { IdInParams } from 'src/utils/dtos/mongo';
 
@@ -29,13 +31,7 @@ export class EntryController {
   constructor(private entryService: EntryService) {}
 
   @Get('')
-  async getEntries(
-    @Req() req: CustomReq,
-    @Query('category') category,
-    @Query('status') status,
-    @Query('search') search,
-  ) {
-    const q = { category, status, search };
+  async getEntries(@Req() req: CustomReq, @Query() q: EntrySearchQuery) {
     return await this.entryService.getEntries(req.user, q);
   }
 
@@ -45,6 +41,7 @@ export class EntryController {
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   async editEntry(
     @Req() req: CustomReq,
     @Param() params: IdInParams,
@@ -54,6 +51,7 @@ export class EntryController {
   }
 
   @Post('')
+  @HttpCode(HttpStatus.CREATED)
   async addEntry(
     @Body() body: CreateEntryPayload,
     @Req() req: CustomReq,
@@ -66,13 +64,13 @@ export class EntryController {
     );
   }
 
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async deleteEntry(@Req() req: CustomReq, @Param() params: IdInParams) {
     return await this.entryService.deleteEntry(req.user._id, params.id);
   }
 
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Patch(':id/change-category')
   async changeEntryCategory(
     @Param() params: IdInParams,

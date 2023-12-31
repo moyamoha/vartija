@@ -14,9 +14,3 @@ export type Mfa = {
 export type ResourseType = 'Category' | 'Entry' | 'User';
 
 export type EntryStatus = (typeof POSSIBLE_ENTRY_STATUS)[number];
-
-export type GetEntriesQuery = {
-  search?: string;
-  status?: 'active' | 'expired';
-  category?: string;
-};
