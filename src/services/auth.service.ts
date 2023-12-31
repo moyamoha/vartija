@@ -15,6 +15,7 @@ import { UserDocument } from 'src/schemas/user.schema';
 import { UserService } from './user.service';
 import { randomPass } from 'src/utils/random';
 import { CreateUserDto } from 'src/utils/dtos/user';
+import { WRONG_VERIFICATION_CODE } from 'src/utils/constants';
 
 @Injectable()
 export class AuthService {
@@ -71,9 +72,7 @@ export class AuthService {
       await foundUser.save();
       return this.login(foundUser);
     } else {
-      throw new UnauthorizedException(
-        'The verification code you provided is wrong!',
-      );
+      throw new UnauthorizedException(WRONG_VERIFICATION_CODE);
     }
   }
 

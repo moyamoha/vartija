@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { UserService } from 'src/services/user.service';
+import { USER_IS_DEACTIVATED } from 'src/utils/constants';
 
 @Injectable()
 export class TokenStrategy extends PassportStrategy(Strategy) {
@@ -19,9 +20,7 @@ export class TokenStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
     if (!user.isActive) {
-      throw new UnauthorizedException(
-        'User is deactivated. Please login again to activate your account',
-      );
+      throw new UnauthorizedException(USER_IS_DEACTIVATED);
     }
     return user;
   }

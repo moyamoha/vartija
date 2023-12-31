@@ -19,3 +19,9 @@ export const DEFAULT_MFA_SETTINGS = {
 
 // Errors
 export const SHOULD_BE_MONGO_ID = 'Id should be mongo id';
+export const USER_IS_DEACTIVATED =
+  'User is deactivated. Please login again to activate your account';
+export const EMAIL_NOT_CONFIRMED = 'User has not confirmed their email address';
+export const WRONG_VERIFICATION_CODE =
+  'The verification code you provided is wrong!';
+export const DUPLICATE_EMAIL = 'Email address is already taken';

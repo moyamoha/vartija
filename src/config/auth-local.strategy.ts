@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from 'src/services/auth.service';
+import { EMAIL_NOT_CONFIRMED } from 'src/utils/constants';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -15,9 +16,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Email or password is incorrect');
     }
     if (!user.emailConfirmed) {
-      throw new UnauthorizedException(
-        'User has not confirmed their email address',
-      );
+      throw new UnauthorizedException(EMAIL_NOT_CONFIRMED);
     }
     return user;
   }

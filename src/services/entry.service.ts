@@ -117,9 +117,7 @@ export class EntryService {
       await oldCategory.save();
       await newCategory.save();
     } catch (error) {
-      throw new BadRequestException(
-        'Bad request, please check the payload of your request',
-      );
+      throw new BadRequestException(error);
     }
   }
 

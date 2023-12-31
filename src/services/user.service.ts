@@ -14,6 +14,7 @@ import {
   accountDeactivedEmailResp,
   accountDeletedEmailResp,
   mfaEnabledEmailResp,
+  DUPLICATE_EMAIL,
 } from 'src/utils/constants';
 import { throwNotFoundError } from 'src/utils/utility-functions';
 import { ChangeNamePayload, CreateUserDto } from 'src/utils/dtos/user';
@@ -43,7 +44,7 @@ export class UserService {
       created = await newUser.save({ validateBeforeSave: false });
     } catch (e) {
       if (e.code === 11000) {
-        throw new BadRequestException('Email address is already taken');
+        throw new BadRequestException(DUPLICATE_EMAIL);
       } else {
         throw new BadRequestException(e, e.message);
       }
