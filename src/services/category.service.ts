@@ -1,14 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import { Entry, EntryDocument } from 'src/schemas/entry.schema';
 import { CreateCategoryPayload } from 'src/utils/dtos/category';
+import { throwNotFoundError } from 'src/utils/utility-functions';
 
 @Injectable()
 export class CategoryService {
@@ -51,7 +48,7 @@ export class CategoryService {
       })
       .populate('items');
     if (!category) {
-      throw new NotFoundException(`Category ${id} was not found`);
+      throwNotFoundError('Category', id);
     }
     return category;
   }
@@ -62,7 +59,7 @@ export class CategoryService {
       _id: id,
     });
     if (!categoryBeforeDeletion) {
-      throw new NotFoundException(`Category ${id} was not found`);
+      throwNotFoundError('Category', id);
     }
     await this.entryModel.deleteMany({
       category: categoryBeforeDeletion._id,
@@ -89,7 +86,7 @@ export class CategoryService {
       )
       .populate('items');
     if (!updated) {
-      throw new NotFoundException(`Category ${id} was not found`);
+      throwNotFoundError('Category', id);
     }
     return updated;
   }

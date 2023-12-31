@@ -1,11 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 // import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
@@ -103,7 +98,7 @@ export class UserService {
   async confirmEmail(id: string): Promise<string> {
     const user = await this.userModel.findById(id);
     if (!user) {
-      throw new NotFoundException(`User ${id} was not found`);
+      throwNotFoundError('User', id);
     }
     user.emailConfirmed = true;
     await user.save();

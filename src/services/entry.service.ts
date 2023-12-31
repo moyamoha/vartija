@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Model, Types } from 'mongoose';
@@ -56,11 +52,9 @@ export class EntryService {
       owner: ownerId,
       _id: categoryId,
     });
-    if (!category)
-      throw new NotFoundException(
-        `Category ${categoryId} to which you want to attach new entry, was not found`,
-      );
-
+    if (!category) {
+      throwNotFoundError('Category', categoryId);
+    }
     try {
       const entry = new this.entryModel({
         ...body,
@@ -84,9 +78,7 @@ export class EntryService {
         owner: ownerId,
       });
       if (!categ) {
-        throw new NotFoundException(
-          `Category ${entryObj.category} to which you want to attach new entry, was not found`,
-        );
+        throwNotFoundError('Category', entryObj.category);
       }
     }
     try {
@@ -134,7 +126,7 @@ export class EntryService {
       owner: ownerId,
     });
     if (!deleted) {
-      throw new NotFoundException(`Entry ${id} was not found`);
+      throwNotFoundError('Entry', id);
     }
     await this.categModel.findByIdAndUpdate(deleted.category, {
       $pull: { items: deleted._id },
