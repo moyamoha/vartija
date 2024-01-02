@@ -2,7 +2,6 @@ import {
   IsNotEmpty,
   IsString,
   MinLength,
-  IsStrongPassword,
   IsUrl,
   IsMongoId,
   IsOptional,
@@ -19,7 +18,9 @@ export class CreateEntryPayload {
   @MinLength(3)
   username: string;
 
-  @IsStrongPassword({ minLength: 5 })
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(5)
   password: string;
 
   @IsOptional()
