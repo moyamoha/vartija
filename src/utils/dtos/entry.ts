@@ -6,6 +6,8 @@ import {
   IsMongoId,
   IsOptional,
   IsIn,
+  ValidateIf,
+  isString,
 } from 'class-validator';
 
 export class CreateEntryPayload {
@@ -24,6 +26,7 @@ export class CreateEntryPayload {
   password: string;
 
   @IsOptional()
+  @ValidateIf((o) => isString(o) && o !== '')
   @IsUrl()
   url: string;
 
@@ -62,6 +65,7 @@ export class EditEntryPayload {
   password: string;
 
   @IsOptional()
+  @ValidateIf((o) => isString(o) && o !== '')
   @IsUrl()
   url: string;
 
