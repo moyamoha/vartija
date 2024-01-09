@@ -9,6 +9,7 @@ import { CategoryModule } from './category.module';
 import { EntryModule } from './entry.module';
 import { UserModule } from './user.module';
 import { EventsGateway } from 'src/services/events.service';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EventsGateway } from 'src/services/events.service';
       isGlobal: true,
     }),
     MongooseModule.forRoot(process.env.MONGODB_ATLAS_URL),
+    EventEmitterModule.forRoot({ global: true }),
     AuthModule,
     UserModule,
     EntryModule,
