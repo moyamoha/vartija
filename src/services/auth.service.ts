@@ -1,6 +1,4 @@
-import { MailerService } from '@nestjs-modules/mailer';
 import {
-  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -8,22 +6,21 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as speakeasy from 'speakeasy';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 
 import { UserDocument } from 'src/schemas/user.schema';
 import { UserService } from './user.service';
 import { randomPass } from 'src/utils/random';
 import { CreateUserDto } from 'src/utils/dtos/user';
 import { WRONG_VERIFICATION_CODE } from 'src/utils/constants';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { TempPasswordEvent } from 'src/events/user.events';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-    private mailerService: MailerService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async login(user: UserDocument): Promise<{ accessToken: string }> {
@@ -84,13 +81,8 @@ export class AuthService {
     const randomPassword = randomPass() + randomPass();
     user.password = await bcrypt.hash(randomPassword, 10);
     await user.save();
-    this.mailerService.sendMail({
-      from: process.env.EMAIL_SENDER,
-      to: user.email,
-      subject: 'Reset password',
-      html: `<p><strong>Dear ${user.firstname}!</strong><br></br>Use this password: <strong>${randomPassword}</strong> to log in. Please make sure to change it after you log in </strong>
-      <br></br><i>Team Guardian.</i></p>`,
-    });
+    const tempPassEvent = new TempPasswordEvent(user, randomPassword);
+    await this.eventEmitter.emitAsync('send-temp-password', tempPassEvent);
   }
 
   generateOtp(user: UserDocument) {

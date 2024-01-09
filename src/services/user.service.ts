@@ -1,4 +1,3 @@
-import { MailerService } from '@nestjs-modules/mailer';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 // import { JwtService } from '@nestjs/jwt';
@@ -9,24 +8,19 @@ import { Model } from 'mongoose';
 import * as speakeasy from 'speakeasy';
 
 import { User, UserDocument } from 'src/schemas/user.schema';
-import {
-  mfaDisabledEmailResp,
-  accountDeactivedEmailResp,
-  accountDeletedEmailResp,
-  mfaEnabledEmailResp,
-  DUPLICATE_EMAIL,
-} from 'src/utils/constants';
+import { DUPLICATE_EMAIL } from 'src/utils/constants';
 import { throwNotFoundError } from 'src/utils/utility-functions';
 import { ChangeNamePayload, CreateUserDto } from 'src/utils/dtos/user';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
-    private mailerService: MailerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async createUser(userObj: CreateUserDto): Promise<UserDocument> {
@@ -49,16 +43,7 @@ export class UserService {
         throw new BadRequestException(e, e.message);
       }
     }
-    const confirmationLink = `${process.env.SITE_ADDRESS}/users/confirm/?id=${created._id}`;
-    await this.mailerService.sendMail({
-      from: process.env.EMAIL_SENDER,
-      to: created.email,
-      text: 'Welcome to Guardian',
-      subject: 'Welcome to Guardian',
-      html: `<p><strong>Dear ${created.firstname}!</strong><br></br>We are glad you chose Guardian to keep your passwords safe and secure. 
-      Before you can do anything, please confirm your email address by clicking <a href="${confirmationLink}">This link</a>
-      <br></br><i>Team Guardian.</i></p>`,
-    });
+    this.eventEmitter.emit('user.created', created);
     return created;
   }
   async findOneByEmail(email: string): Promise<UserDocument> {
@@ -74,26 +59,14 @@ export class UserService {
     }
     try {
       user.isActive = false;
-      await this.mailerService.sendMail({
-        from: process.env.EMAIL_SENDER,
-        to: user.email,
-        subject: 'Your account is DEACTIVATED',
-        html: `<p><strong>Dear ${user.firstname}!</strong><br></br>${accountDeactivedEmailResp}
-        <br></br><i>Team Guardian.</i></p>`,
-      });
+      this.eventEmitter.emit('user.deactivated', user);
       await user.save();
     } catch (e) {}
   }
 
   async deleteAccount(id: string) {
     const user = await this.userModel.findByIdAndDelete(id);
-    await this.mailerService.sendMail({
-      from: process.env.EMAIL_SENDER,
-      to: user.email,
-      subject: 'Your account was DELETED',
-      html: `<p><strong>Dear ${user.firstname}!</strong><br></br>${accountDeletedEmailResp}
-      <br></br><i>Team Guardian.</i></p>`,
-    });
+    this.eventEmitter.emit('user.deleted', user);
   }
 
   async confirmEmail(id: string): Promise<string> {
@@ -114,13 +87,7 @@ export class UserService {
     try {
       user.mfa = { enabled: false, userSecret: '' };
       const updated = await user.save();
-      await this.mailerService.sendMail({
-        from: process.env.EMAIL_SENDER,
-        to: updated.email,
-        subject: 'Oops! your account is VULNERABLE',
-        html: `<p><strong>Dear ${updated.firstname}!</strong><br></br>${mfaDisabledEmailResp}
-        <br></br><i>Team Guardian.</i></p>`,
-      });
+      this.eventEmitter.emit('user.disabled-mfa', updated);
       return updated;
     } catch (error) {
       throw new BadRequestException('Could not update user');
@@ -142,13 +109,7 @@ export class UserService {
       }
       user.mfa = { enabled: true, userSecret: secret };
       const updated = await user.save();
-      await this.mailerService.sendMail({
-        from: process.env.EMAIL_SENDER,
-        to: updated.email,
-        subject: 'Your account is now SECURE',
-        html: `<p><strong>Dear ${updated.firstname}!</strong><br></br>${mfaEnabledEmailResp}
-        <br></br><i>Team Guardian.</i></p>`,
-      });
+      this.eventEmitter.emit('user.enabled-mfa', updated);
       await this.cacheManager.del(updated._id + '_temp_secret');
       return updated;
     } catch (error) {

@@ -20,10 +20,10 @@ import { CacheModule } from '@nestjs/cache-manager';
     ]),
     MailerModule.forRoot({
       transport: {
-        host: process.env.SENDGRID_SERVER,
+        host: process.env.BREVO_SERVER,
         auth: {
-          user: process.env.SENDGRID_USERNAME,
-          pass: process.env.SENDGRID_API_KEY,
+          user: process.env.BREVO_USERNAME,
+          pass: process.env.BREVO_API_KEY,
         },
       },
     }),
