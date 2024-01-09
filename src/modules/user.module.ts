@@ -12,6 +12,7 @@ import { TaskService } from 'src/services/task.service';
 import { UserService } from '../services/user.service';
 import { CacheModule } from '@nestjs/cache-manager';
 import { UserListenerService } from 'src/events/user.listener';
+import brevoSmtpConfigFactory from 'src/config/mailer';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -19,14 +20,8 @@ import { UserListenerService } from 'src/events/user.listener';
       { name: Category.name, schema: CategorySchema },
       { name: Entry.name, schema: EntrySchema },
     ]),
-    MailerModule.forRoot({
-      transport: {
-        host: process.env.BREVO_SERVER,
-        auth: {
-          user: process.env.BREVO_USERNAME,
-          pass: process.env.BREVO_API_KEY,
-        },
-      },
+    MailerModule.forRootAsync({
+      useFactory: brevoSmtpConfigFactory,
     }),
     ScheduleModule.forRoot(),
     CacheModule.register(),
